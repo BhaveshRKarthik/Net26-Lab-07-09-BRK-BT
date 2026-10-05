@@ -1,0 +1,29 @@
+{
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "Makefile build",
+      "tools": ["make"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "make",
+      "command": "make",
+      "args": []
+    }
+  ],
+
+  "latex-workshop.latex.autoBuild.run": "onSave",
+
+  "latex-workshop.latex.rootFile.useSubFile": false,
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
+
+  "files.exclude": {
+    "**/.*": true,
+    "*.aux": true,
+    "*.fdb_latexmk": true,
+    "*.fls": true,
+    "*.log": true,
+    "*.out": true,
+  }
+}

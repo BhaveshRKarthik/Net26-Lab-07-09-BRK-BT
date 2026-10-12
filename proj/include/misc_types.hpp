@@ -3,7 +3,9 @@
 #include <exception>
 #include <source_location>
 #include <stdexcept>
+#include <string>
 #include <string_view>
+#include <sys/types.h>
 #include <utility>
 
 namespace brk_bt {
@@ -23,7 +25,8 @@ namespace brk_bt {
             : std::runtime_error(error_string(loc, err)) {}
     };
 
-    // maybe useful later?
+    void test_fail(ssize_t test, std::string_view error_msg, const std::source_location& loc = std::source_location::current());
+
     namespace detail::defer {
         template<typename Func>
         class defer_impl : immovable {

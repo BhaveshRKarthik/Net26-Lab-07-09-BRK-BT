@@ -29,14 +29,16 @@ uint32_t str_to_ip_uint(const std::string& ip_str) {
 using namespace brk_bt;
 
 int main() {
-    lsp_tuple C = {'C', str_to_ip_uint("10.0.0.2"), 5000, 1};
-    lsp_tuple D = {'D', str_to_ip_uint("10.0.0.2"), 5001, 7};
-    lsp_tuple E = {'E', str_to_ip_uint("10.0.0.2"), 5002, 0};
+    ls_tuple C = {'C', str_to_ip_uint("10.0.0.2"), 5000, 1};
+    ls_tuple D = {'D', str_to_ip_uint("10.0.0.2"), 5001, 7};
+    ls_tuple E = {'E', str_to_ip_uint("10.0.0.2"), 5002, 0};
+    link_state ls = std::vector<ls_tuple>{C, D, E};
 
-    lsp_packet pkt {{C, D, E}, 0xaabbccdd, 'X'};
+    lsp_packet pkt {ls, 0xaabbccdd, 'X'};
 
     lsp_packet test_pkt = lsp_packet::from_binary(pkt.to_binary());
 
     assert(pkt.seq_no == test_pkt.seq_no);
-    assert(pkt.data == test_pkt.data);   
+    assert(pkt.data.tuples == test_pkt.data.tuples);
+    assert(link_state::from_binary(ls.to_binary()).tuples == ls.tuples);
 }

@@ -33,7 +33,7 @@ int main() {
     lsp_tuple D = {'D', str_to_ip_uint("10.0.0.2"), 5001, 7};
     lsp_tuple E = {'E', str_to_ip_uint("10.0.0.2"), 5002, 0};
 
-    lsp_packet pkt {{C, D, E}, 0xaabbccdd};
+    lsp_packet pkt {{C, D, E}, 0xaabbccdd, 'X'};
 
     lsp_packet test_pkt = lsp_packet::from_binary(pkt.to_binary());
 

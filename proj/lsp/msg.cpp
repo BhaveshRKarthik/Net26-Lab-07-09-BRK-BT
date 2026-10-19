@@ -5,16 +5,17 @@ namespace brk_bt {
 
     lsp_packet lsp_packet::from_binary(std::span<const std::byte> bytes) {
         uint32_t off    = 0;
+        char origin_alpha = static_cast<char>(bytes[off++]);
         uint32_t seq_no = (static_cast<uint32_t>(bytes[off + 0]) << 24) + (static_cast<uint32_t>(bytes[off + 1]) << 16) +
                           (static_cast<uint32_t>(bytes[off + 2]) << 8) + static_cast<uint32_t>(bytes[off + 3]);
         off += 4;
-        lsp_packet pkt{ .seq_no = seq_no };
+        lsp_packet pkt{ .seq_no = seq_no, .origin_alpha = origin_alpha};
         auto& data = pkt.data;
 
         unsigned char N = static_cast<unsigned char>(bytes[off++]);
         if (N >= 26) throw exception_with_location("Unexpected length");
         static_assert(sizeof(lsp_tuple) == 12);
-        if (bytes.size() != 4 + 1 + 11 * N) throw exception_with_location("Unexpected packet size");
+        if (bytes.size() != 1 + 4 + 1 + 11 * N) throw exception_with_location("Unexpected packet size");
 
         data.reserve(N);
 
@@ -38,7 +39,9 @@ namespace brk_bt {
     std::vector<std::byte> lsp_packet::to_binary() const {
         std::vector<std::byte> bin;
         unsigned char N = data.size();
-        bin.reserve(4 + 1 + 11 * N);
+        bin.reserve(1 + 4 + 1 + 11 * N);
+
+        bin.push_back(static_cast<std::byte>(origin_alpha));
 
         bin.push_back(static_cast<std::byte>((seq_no >> 24) & 0xff));
         bin.push_back(static_cast<std::byte>((seq_no >> 16) & 0xff));
@@ -49,7 +52,7 @@ namespace brk_bt {
 
         for (int i = 0; i < N; ++i) {
             const auto& tuple = data[i];
-            bin.push_back(static_cast<std::byte>(tuple.src_alpha));
+            bin.push_back(static_cast<std::byte>(tuple.nbr_alpha));
 
             bin.push_back(static_cast<std::byte>((tuple.udp_port >> 8) & 0xff));
             bin.push_back(static_cast<std::byte>((tuple.udp_port >> 0) & 0xff));

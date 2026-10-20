@@ -2,9 +2,7 @@
 
 #include <array>
 #include <cstring>
-
-#define NAME_TO_IDX(c) (c - 'A')
-#define IDX_TO_NAME(c) (c + 'A')
+#include "config.hpp"
 
 struct Neighbourhood {
     std::array<int, 26*26> adj;

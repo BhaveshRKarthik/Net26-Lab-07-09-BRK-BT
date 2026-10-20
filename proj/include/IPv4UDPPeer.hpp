@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cerrno>
 #include <cstdint>
 #include <fcntl.h>
 #include <netinet/in.h>
@@ -9,7 +10,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <utility>
-#include <cerrno>
 
 #include "misc_types.hpp"
 
@@ -24,7 +24,7 @@ namespace brk_bt {
     public:
         explicit FdProtector(int fd) : m_fd(fd) {}
         ~FdProtector() { reset(); }
-        FdProtector(const FdProtector&)           = delete;
+        FdProtector(const FdProtector&)            = delete;
         FdProtector& operator=(const FdProtector&) = delete;
 
         FdProtector(FdProtector&& o) noexcept : m_fd(std::exchange(o.m_fd, -1)) {}
@@ -39,7 +39,10 @@ namespace brk_bt {
         int get() const { return m_fd; }
 
     private:
-        void reset() { if (m_fd >= 0) ::close(m_fd); m_fd = -1; }
+        void reset() {
+            if (m_fd >= 0) ::close(m_fd);
+            m_fd = -1;
+        }
         int m_fd = -1;
     };
 
@@ -59,6 +62,9 @@ namespace brk_bt {
             if (!(fl & O_NONBLOCK)) throw exception_with_location("Blocking socket handed to IPv4UDPPeer");
 
             sockaddr_in addr{ .sin_family = AF_INET, .sin_port = htons(m_port), .sin_addr = { htonl(INADDR_ANY) } };
+
+            // int on = 1;
+            // test_fail(::setsockopt(m_sock.get(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)), "setsockopt SO_REUSEADDR failed");
             test_fail(::bind(m_sock.get(), reinterpret_cast<sockaddr*>(&addr), sizeof(addr)), "Failed to acquire port");
 
             socklen_t sz = sizeof(addr);

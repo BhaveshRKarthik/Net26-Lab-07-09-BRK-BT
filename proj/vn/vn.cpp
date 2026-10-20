@@ -10,6 +10,7 @@
 
 #include "misc_types.hpp"
 #include "IPv4TCPClient.hpp"
+#include "IPv4UDPPeer.hpp"
 
 void help_options() {
     std::cout << 
@@ -56,5 +57,23 @@ int main(int argc, char* argv[]) {
 
     brk_bt::IPv4TCPClient on_sock;
     on_sock.connect(on_ip, on_tcp_port);
+    std::cout << "CONNECTED\n";
+
+    brk_bt::IPv4UDPPeer my_sock{self_udp_port};
+    while (true) {
+        std::string s = on_sock.recv(); 
+        // each message from the server consists of one or more LINK-STATE messages
+        // I can read one tuple at a time from the byte stream but currently you
+        // cannot separate lists of tuples sent at different points in time, they
+        // just get merged by tcp
+        std::cout << "=== BEGIN ===\n";
+        std::cout << s.size() << '\n';
+        // OPERATION OF VIRTUAL NODE 2(D) -> need to be able to tell lists of tuples apart
+        // On receiving LINK-STATE message, print to STDOUT in human-readable format, the
+        // neighbourhood link state. E.g. node E in given example network can print    
+        std::cout << "=== END ===\n";
+        std::cout.flush(); // does not seem to help
+        sleep(1);
+    }
 
 }

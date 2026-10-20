@@ -55,6 +55,7 @@ class OracleServer:
         c = VirtualNode(sock)
         self.clients[sock.fileno()] = c
         if len(self.nodes) < self.n:
+            print(f"Accepted node with socket: {sock}")
             self.nodes.append(c)
             self.ep.register(sock.fileno(), select.EPOLLIN)
  

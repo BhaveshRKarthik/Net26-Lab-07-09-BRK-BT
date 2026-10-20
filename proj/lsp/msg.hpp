@@ -106,9 +106,9 @@ namespace brk_bt {
     };
 
     struct lsp_packet {
+        char origin_alpha;
         link_state data;
         uint32_t seq_no;
-        char origin_alpha;
 
         static lsp_packet from_binary(std::span<const std::byte> bytes);
         std::vector<std::byte> to_binary() const;

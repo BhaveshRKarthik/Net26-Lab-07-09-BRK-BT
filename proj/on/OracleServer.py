@@ -11,7 +11,7 @@ from consts import *
 class VirtualNode:
     sock: socket.socket
     # raw 6-byte CONNECT body (LINK-STATE has same 6 bytes required in same order)
-    connect: bytearray | None = None  
+    connect: bytearray | None = field(default_factory=bytearray)  
  
  
 class OracleServer:
@@ -97,6 +97,7 @@ class OracleServer:
                 msg += bytes([65 + j]) + peer.connect + struct.pack("!I", cost)
             try:
                 me.sock.sendall(msg)
+                print(f"Sent Message to {i}")
             except OSError:
                 pass
  

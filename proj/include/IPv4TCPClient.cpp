@@ -1,17 +1,20 @@
 #include "IPv4TCPClient.hpp"
 
 namespace brk_bt {
-    std::string IPv4TCPClient::recv(int flags) {
-        std::string result;
-        char buf[1024];
-        ssize_t recv_len;
-        do {
-            recv_len = ::recv(m_sock, buf, sizeof(buf), flags);
-            test_fail(recv_len, "Failed to recv");
-            result += std::string_view{ buf, static_cast<std::size_t>(recv_len) };
-        } while (recv_len > 0);
+    std::optional<link_state> IPv4TCPClient::recv(int flags) {
+        ssize_t recv_len = 0;
+        
+        uint8_t size;
+        recv_len = ::recv(m_sock, &size, 1, flags);
+        if (recv_len == 0 || (recv_len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))) return std::nullopt;
+        test_fail(recv_len, "Failed to recv size byte");
 
-        return result;
+        std::vector<std::byte> buf(11*size);
+        do {
+            recv_len = ::recv(m_sock, buf.data(), buf.size(), 0);
+        } while (recv_len < 0 && errno == EAGAIN);
+        test_fail(recv_len, "Failed to recv");
+        return link_state::from_binary(buf);
     }
 
     void IPv4TCPClient::send(std::string_view data, int flags) {

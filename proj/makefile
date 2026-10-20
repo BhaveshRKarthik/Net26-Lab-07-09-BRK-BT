@@ -1,6 +1,6 @@
 LD = g++
 
-COM_FLAGS = -g -Iinclude
+COM_FLAGS = -g -Iinclude -Ilsp
 
 CFLAGS = $(COM_FLAGS)
 CXXFLAGS = $(COM_FLAGS) -std=c++23

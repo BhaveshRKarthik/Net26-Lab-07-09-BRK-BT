@@ -3,11 +3,13 @@
 #include <cstdint>
 #include <netinet/in.h>
 #include <string>
+#include <optional>
 #include <string_view>
 #include <sys/socket.h>
 #include <unistd.h>
 
 #include "misc_types.hpp"
+#include "msg.hpp"
 
 namespace brk_bt {
     class IPv4TCPClient :immovable {
@@ -21,7 +23,8 @@ namespace brk_bt {
             test_fail(::connect(m_sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)), "Failed to connect");
         }
 
-        std::string recv(int flags = 0);
+        
+        std::optional<link_state> recv(int flags = 0);
 
         void send(std::string_view data, int flags = 0);
 

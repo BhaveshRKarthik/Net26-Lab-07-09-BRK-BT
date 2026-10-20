@@ -59,7 +59,7 @@ namespace brk_bt {
 
         std::vector<std::byte> to_binary() const {
             std::vector<std::byte> bin;
-            const uint32_t N = size();
+            const unsigned char N = size();
 
             for (int i = 0; i < N; ++i) {
                 const auto& tuple = tuples[i];
@@ -99,9 +99,19 @@ namespace brk_bt {
             return ct;
         }
 
-        std::vector<std::byte> to_binary() const {
-            return { static_cast<std::byte>((ip >> 24) & 0xff), static_cast<std::byte>((ip >> 16) & 0xff),      static_cast<std::byte>((ip >> 8) & 0xff),
-                     static_cast<std::byte>(ip & 0xff),         static_cast<std::byte>((udp_port >> 8) & 0xff), static_cast<std::byte>(udp_port & 0xff) };
+        std::string to_binary() const {
+            return from_byte_list({ 
+                static_cast<std::byte>((ip >> 24) & 0xff), 
+                static_cast<std::byte>((ip >> 16) & 0xff),
+                static_cast<std::byte>((ip >> 8) & 0xff),
+                static_cast<std::byte>(ip & 0xff),
+                static_cast<std::byte>((udp_port >> 8) & 0xff),
+                static_cast<std::byte>(udp_port & 0xff) });
+        }
+
+    private:
+        std::string from_byte_list(std::initializer_list<std::byte> bytes) const {
+            return std::string(reinterpret_cast<const char*>(bytes.begin()), bytes.size());
         }
     };
 

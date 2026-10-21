@@ -56,23 +56,25 @@ int main(int argc, char* argv[]) {
     }
 
     for (int i = 1; i < argc; ++i) {
-        auto arg = argv[i];
-
-        if (arg == "--on-ip") {
+        auto& arg = argv[i];
+        using namespace std::string_view_literals;
+        if (arg == "--on-ip"sv) {
             if (++i == argc) throw brk_bt::exception_with_location("Expected: ON IP");
             on_ip.s_addr = atoi(argv[i]);
-        } else if (arg == "--on-port") {
+        } else if (arg == "--on-port"sv) {
             if (++i == argc) throw brk_bt::exception_with_location("Expected: ON TCP port");
             on_tcp_port = atoi(argv[i]);
-        } else if (arg == "--my-port") {
+        } else if (arg == "--my-port"sv) {
             if (++i == argc) throw brk_bt::exception_with_location("Expected: VN UDP port");
             self_udp_port = atoi(argv[i]);
-        } else if (arg == "--my-ip") {
+        } else if (arg == "--my-ip"sv) {
             if (++i == argc) throw brk_bt::exception_with_location("Expected: VN IP");
             self_ip = atoi(argv[i]);
-        } else if (arg == "--help") {
+        } else if (arg == "--help"sv) {
             help_options();
             return 0;
+        } else {
+            throw brk_bt::exception_with_location(std::format("Unknown Argument {}", arg));
         }
     }
 
@@ -81,7 +83,7 @@ int main(int argc, char* argv[]) {
     std::cout << "CONNECTED\n";
 
     if (!self_ip)
-        brk_bt::test_fail((self_ip = get_interface_ip("wlo1")) - 1, "Could not find My IP");
+        brk_bt::test_fail((self_ip = get_interface_ip("eth0")) - 1, "Could not find My IP");
 
 
     brk_bt::connect_tuple con_msg {

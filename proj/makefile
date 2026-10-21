@@ -1,32 +1,29 @@
 LD = g++
 
-COM_FLAGS = -g -Iinclude -Ilsp
+-include */*.d
+.PRECIOUS: */*.o
 
-CFLAGS = $(COM_FLAGS)
-CXXFLAGS = $(COM_FLAGS) -std=c++23
-LDFLAGS = $(COM_FLAGS)
+CXXFLAGS = -g -Iinclude -Ilsp -MD -std=c++23
+LDFLAGS = -g -Iinclude -Ilsp
 
-TASKS = $(filter-out include,$(patsubst %/,%,$(wildcard */)))
-TASKS_OUT = $(patsubst %,%.out,$(TASKS))
+VNOBJS = $(addsuffix .o, $(basename $(wildcard vn/*.cpp lsp/*.cpp include/*.cpp)))
+ONOBJS = $(wildcard on/*.py)
 
-get_o_files = $(addsuffix .o, $(basename $(wildcard $1/*.c $1/*.cpp include/*.c include/*.cpp)))
-OBJS = $(strip $(foreach t,$(TASKS),$(call get_o_files,$(t))))
-
-INCLUDES = $(wildcard include/*.h include/*.hpp)
-
-.PHONY: all clean
+.PHONY: on vn clean
 
 default:
 	@printf "Usage: make [task]\n"
 
-$(TASKS): %: %.out
+vn: vn.out
+	./vn.out $(FLAGS)
 
 .SECONDEXPANSION:
 
-$(TASKS_OUT): %.out: $$(call get_o_files,$$*)
+vn.out: $(VNOBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-$(OBJS): %: $(INCLUDES)
+on:
+	python3 on/on.py $(FLAGS)
 
 clean:
-	rm -fv $(TASKS_OUT) $(OBJS)
+	rm -rfv $(TASKS_OUT) */*.o */*.d on/__pycache__

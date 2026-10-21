@@ -12,7 +12,7 @@
 #include "msg.hpp"
 
 namespace brk_bt {
-    class IPv4TCPClient :immovable {
+    class IPv4TCPClient : immovable {
     public:
         IPv4TCPClient() : IPv4TCPClient(socket(PF_INET, SOCK_STREAM, 0)) {}
         ~IPv4TCPClient() { close(m_sock); }
@@ -23,13 +23,11 @@ namespace brk_bt {
             test_fail(::connect(m_sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)), "Failed to connect");
         }
 
-        
-        std::optional<link_state> recv(int flags = 0);
+        std::optional<link_state> recv();
 
-        void send(std::string_view data, int flags = 0);
+        void send(std::span<const std::byte> data);
 
-    protected:
-        friend class IPv4TCPServer;
+    private:
         IPv4TCPClient(int sock) : m_sock(sock) { test_fail(sock, "Invalid Socket"); }
 
     private:

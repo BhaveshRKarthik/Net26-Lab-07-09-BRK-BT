@@ -10,8 +10,10 @@ from consts import *
 @dataclass(slots=True)
 class VirtualNode:
     sock: socket.socket
+    letter: bytes = field(default=b'@')
+
     # raw 6-byte CONNECT body (LINK-STATE has same 6 bytes required in same order)
-    connect: bytearray | None = field(default_factory=bytearray)  
+    connect: bytearray = field(default_factory=bytearray)  
  
  
 class OracleServer:
@@ -21,10 +23,15 @@ class OracleServer:
         self.n = len(self.config)
  
         self.clients: dict[int, VirtualNode] = {} # all connections
-        self.nodes = [] # actual nodes (non-extra)
+        self.nodes : list[VirtualNode] = [] # actual nodes (non-extra)
  
         self.ep = select.epoll()
-        self.server = socket.create_server((host_ip, port))
+        
+        server = self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind((host_ip, port))
+        server.listen()
+
         self.ino = inotify.INotifyIO()
         self.ino.add_watch(self.path.parent, inotify.IN_CLOSE_WRITE | inotify.IN_MOVED_TO)
         self.ep.register(self.server.fileno(), select.EPOLLIN)
@@ -33,7 +40,10 @@ class OracleServer:
     def __enter__(self):
         return self
  
-    def __exit__(self, *exc_info):
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            print(f"\n{RED}Exception Encountered:{RESET}\n")
+
         for c in self.clients.values():
             c.sock.close()
         for x in (self.server, self.ino, self.ep):
@@ -55,24 +65,28 @@ class OracleServer:
         c = VirtualNode(sock)
         self.clients[sock.fileno()] = c
         if len(self.nodes) < self.n:
-            print(f"Accepted node with socket: {sock}")
+            c.letter = bytes([65+len(self.nodes)])
+            print(f"{GREEN}[+] Accepted connect from {c.letter.decode()}{RESET}: {sock.getpeername()[0]}:{sock.getpeername()[1]}")
             self.nodes.append(c)
             self.ep.register(sock.fileno(), select.EPOLLIN)
  
-    def read_connect(self, c):
+    def read_connect(self, c: VirtualNode):
+        if len(c.connect) == 6:
+            raise ConnectionError("VN disconnected or sent unexpected data")
         try:
             data = c.sock.recv(6 - len(c.connect))
         except BlockingIOError:
             return
         c.connect += data
         # disconnect or CONNECT complete
-        if len(c.connect) == 6 or not data:
-            self.ep.unregister(c.sock.fileno())
+        if not data:
+            raise ConnectionError("VN disconnected before sending CONNECT")
         if len(c.connect) == 6:
+            print(f"{GREEN}[+] Received CONNECT from {c.letter.decode()}{RESET}: {c.connect.hex('-').upper()}")
             c.sock.setblocking(True)
-            self.broadcast()
-        else:
-            print(f'{RED}Warning:{RESET} {YELLOW}Virtual Node Disconnected.{RESET}')
+            if len(self.nodes) == self.n and all(len(x.connect) == 6 for x in self.nodes):
+                print(f"\n{GREEN}ALL VIRTUAL NODES CONNECTED{RESET}")
+                self.broadcast()
 
  
     def config_event(self):
@@ -82,22 +96,18 @@ class OracleServer:
         try:
             new = read_config(self.path, self.n)
         except (AssertionError, ValueError, OSError):
+            print(f"{RED}WARNING: {YELLOW}half written/invalid config detected. continuing with old config.{RESET}")
             return  # half-written or invalid file: keep the old config
         if new != self.config:
             self.config = new
+            print(f"\n{GREEN}Virtual Node topology change detected{RESET}")
             self.broadcast()
  
     def broadcast(self):
-        if len(self.nodes) < self.n or any(c.connect is None for c in self.nodes):
-            return
         for i, me in enumerate(self.nodes):
             msg = bytes([self.n])
             for j, peer in enumerate(self.nodes):
-                cost = self.config[i][j] & 0xFFFFFFFF # limit to 32 bits
-                msg += bytes([65 + j]) + peer.connect + struct.pack("!I", cost)
-            try:
-                me.sock.sendall(msg)
-                print(f"Sent Message to {i}")
-            except OSError:
-                pass
+                msg += peer.letter + peer.connect + struct.pack("!I", self.config[i][j])
+            me.sock.sendall(msg)
+            print(f"{BLUE}  -> Sent Message to {me.letter.decode()}{RESET}")
  

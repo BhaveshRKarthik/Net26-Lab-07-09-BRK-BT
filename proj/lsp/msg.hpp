@@ -99,26 +99,21 @@ namespace brk_bt {
             return ct;
         }
 
-        std::string to_binary() const {
-            return from_byte_list({ 
+        std::vector<std::byte> to_binary() const {
+            return { 
                 static_cast<std::byte>((ip >> 24) & 0xff), 
                 static_cast<std::byte>((ip >> 16) & 0xff),
                 static_cast<std::byte>((ip >> 8) & 0xff),
                 static_cast<std::byte>(ip & 0xff),
                 static_cast<std::byte>((udp_port >> 8) & 0xff),
-                static_cast<std::byte>(udp_port & 0xff) });
-        }
-
-    private:
-        std::string from_byte_list(std::initializer_list<std::byte> bytes) const {
-            return std::string(reinterpret_cast<const char*>(bytes.begin()), bytes.size());
+                static_cast<std::byte>(udp_port & 0xff) };
         }
     };
 
     struct lsp_packet {
-        char origin_alpha;
         link_state data;
         uint32_t seq_no;
+        char origin_alpha;
 
         static lsp_packet from_binary(std::span<const std::byte> bytes);
         std::vector<std::byte> to_binary() const;

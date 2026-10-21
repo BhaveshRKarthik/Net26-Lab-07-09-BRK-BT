@@ -11,11 +11,7 @@ struct Neighbourhood {
         adj.fill(-1);
     }
 
-    int& operator[](int i, int j) {
-        return adj[26 * i + j];
-    }
-    
-    const int& operator[](int i, int j) const {
-        return adj[26 * i + j];
+    auto& operator[](this auto& self, int i, int j) {
+        return self.adj[26 * i + j];
     }
 };

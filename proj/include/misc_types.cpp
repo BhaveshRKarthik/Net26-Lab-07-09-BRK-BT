@@ -1,7 +1,7 @@
 #include "misc_types.hpp"
-#include <format>
-#include <cstring>
 #include <cerrno>
+#include <cstring>
+#include <format>
 
 namespace brk_bt {
     std::string exception_with_location::error_string(const std::source_location& loc, std::string_view err) {

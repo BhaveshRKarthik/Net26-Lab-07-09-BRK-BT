@@ -7,7 +7,7 @@ namespace brk_bt {
         uint32_t off      = 0;
         char origin_alpha = static_cast<char>(bytes[off++]);
         uint32_t seq_no   = (static_cast<uint32_t>(bytes[off + 0]) << 24) + (static_cast<uint32_t>(bytes[off + 1]) << 16) +
-                            (static_cast<uint32_t>(bytes[off + 2]) << 8) + static_cast<uint32_t>(bytes[off + 3]);
+                          (static_cast<uint32_t>(bytes[off + 2]) << 8) + static_cast<uint32_t>(bytes[off + 3]);
         off += 4;
         lsp_packet pkt{ .seq_no = seq_no, .origin_alpha = origin_alpha };
         auto& data = pkt.data.tuples;

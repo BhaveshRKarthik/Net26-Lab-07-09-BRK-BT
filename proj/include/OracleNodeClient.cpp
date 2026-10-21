@@ -1,7 +1,7 @@
-#include "IPv4TCPClient.hpp"
+#include "OracleNodeClient.hpp"
 
 namespace brk_bt {
-    std::optional<link_state> IPv4TCPClient::recv() {
+    std::optional<link_state> OracleNodeClient::recv() {
         ssize_t recv_len = 0;
 
         uint8_t size;
@@ -24,7 +24,7 @@ namespace brk_bt {
         return link_state::from_binary(buf);
     }
 
-    void IPv4TCPClient::send(std::span<const std::byte> data) {
+    void OracleNodeClient::send(std::span<const std::byte> data) {
         while (!data.empty()) {
             ssize_t curr = ::send(m_sock, data.data(), data.size(), MSG_NOSIGNAL);
             test_fail(curr, "Failed to send");

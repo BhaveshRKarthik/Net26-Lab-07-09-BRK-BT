@@ -100,13 +100,8 @@ namespace brk_bt {
         }
 
         std::vector<std::byte> to_binary() const {
-            return { 
-                static_cast<std::byte>((ip >> 24) & 0xff), 
-                static_cast<std::byte>((ip >> 16) & 0xff),
-                static_cast<std::byte>((ip >> 8) & 0xff),
-                static_cast<std::byte>(ip & 0xff),
-                static_cast<std::byte>((udp_port >> 8) & 0xff),
-                static_cast<std::byte>(udp_port & 0xff) };
+            return { static_cast<std::byte>((ip >> 24) & 0xff), static_cast<std::byte>((ip >> 16) & 0xff),      static_cast<std::byte>((ip >> 8) & 0xff),
+                     static_cast<std::byte>(ip & 0xff),         static_cast<std::byte>((udp_port >> 8) & 0xff), static_cast<std::byte>(udp_port & 0xff) };
         }
     };
 

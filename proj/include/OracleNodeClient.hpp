@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <netinet/in.h>
-#include <string>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -12,10 +12,10 @@
 #include "msg.hpp"
 
 namespace brk_bt {
-    class IPv4TCPClient : immovable {
+    class OracleNodeClient : immovable {
     public:
-        IPv4TCPClient() : IPv4TCPClient(socket(PF_INET, SOCK_STREAM, 0)) {}
-        ~IPv4TCPClient() { close(m_sock); }
+        OracleNodeClient() : OracleNodeClient(socket(PF_INET, SOCK_STREAM, 0)) {}
+        ~OracleNodeClient() { close(m_sock); }
 
     public:
         void connect(in_addr ip, std::uint16_t port) {
@@ -28,7 +28,7 @@ namespace brk_bt {
         void send(std::span<const std::byte> data);
 
     private:
-        IPv4TCPClient(int sock) : m_sock(sock) { test_fail(sock, "Invalid Socket"); }
+        OracleNodeClient(int sock) : m_sock(sock) { test_fail(sock, "Invalid Socket"); }
 
     private:
         int m_sock;

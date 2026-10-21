@@ -1,7 +1,7 @@
 #include <arpa/inet.h>
-#include <ifaddrs.h>
 #include <atomic>
 #include <cstring>
+#include <ifaddrs.h>
 #include <iostream>
 #include <netinet/in.h>
 #include <print>
@@ -9,19 +9,18 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "misc_types.hpp"
-#include "IPv4TCPClient.hpp"
 #include "IPv4UDPPeer.hpp"
+#include "OracleNodeClient.hpp"
+#include "misc_types.hpp"
 #include "msg.hpp"
 
 void help_options() {
-    std::cout << 
-    "./vn [OPTIONS]\n"
-    "\t--on-ip\n"
-    "\t--on-port\n"
-    "\t--my-ip\n"
-    "\t--my-port\n"
-    "\t--help\n";
+    std::cout << "./vn [OPTIONS]\n"
+                 "\t--on-ip\n"
+                 "\t--on-port\n"
+                 "\t--my-ip\n"
+                 "\t--my-port\n"
+                 "\t--help\n";
 }
 
 // Returns IPv4 address in network byte order, or 0 on failure.
@@ -35,7 +34,7 @@ uint32_t get_interface_ip(const char* ifname) {
         if (std::strcmp(ifa->ifa_name, ifname) != 0) continue;
 
         auto* sin = reinterpret_cast<sockaddr_in*>(ifa->ifa_addr);
-        result = sin->sin_addr.s_addr;
+        result    = sin->sin_addr.s_addr;
         break;
     }
     freeifaddrs(list);
@@ -44,7 +43,7 @@ uint32_t get_interface_ip(const char* ifname) {
 
 
 int main(int argc, char* argv[]) {
-    in_addr on_ip {0};
+    in_addr on_ip{ 0 };
     uint16_t on_tcp_port = 5000;
 
     uint32_t self_ip       = 0;
@@ -78,23 +77,21 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    brk_bt::IPv4TCPClient on_sock;
+    brk_bt::OracleNodeClient on_sock;
     on_sock.connect(on_ip, on_tcp_port);
     std::cout << "CONNECTED\n";
 
-    if (!self_ip)
+    if (!self_ip) {
         brk_bt::test_fail((self_ip = get_interface_ip("eth0")) - 1, "Could not find My IP");
+    }
 
 
-    brk_bt::connect_tuple con_msg {
-        .ip = self_ip,
-        .udp_port = self_udp_port
-    };
+    brk_bt::connect_tuple con_msg{ .ip = self_ip, .udp_port = self_udp_port };
     on_sock.send(con_msg.to_binary());
 
-    brk_bt::IPv4UDPPeer my_sock{self_udp_port};
+    brk_bt::IPv4UDPPeer my_sock{ self_udp_port };
     while (true) {
-        auto s = on_sock.recv(); 
+        auto s = on_sock.recv();
         // each message from the server consists of one or more LINK-STATE messages
         // I can read one tuple at a time from the byte stream but currently you
         // cannot separate lists of tuples sent at different points in time, they
@@ -107,14 +104,12 @@ int main(int argc, char* argv[]) {
                 std::println("{}@{}:{}={}", tup.nbr_alpha, tup.ip, tup.udp_port, tup.cost);
             }
         } else {
-
         }
         // OPERATION OF VIRTUAL NODE 2(D) -> need to be able to tell lists of tuples apart
         // On receiving LINK-STATE message, print to STDOUT in human-readable format, the
-        // neighbourhood link state. E.g. node E in given example network can print    
+        // neighbourhood link state. E.g. node E in given example network can print
         std::cout << "=== END ===\n";
         std::cout.flush(); // does not seem to help
         sleep(1);
     }
-
 }

@@ -1,10 +1,8 @@
 #include <iostream>
 
-#include "misc_types.hpp"
-#include "arg_parse.hpp"
 #include "OracleNodeClient.hpp"
-
-brk_bt::config config;
+#include "arg_parse.hpp"
+#include "misc_types.hpp"
 
 int main(int argc, char* argv[]) {
     auto cfg = brk_bt::parse_argv(argc, argv);
@@ -13,7 +11,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    auto [on_ip, vn_ip, on_port, vn_port] = config = *cfg;
+    auto [on_ip, vn_ip, on_port, vn_port] = *cfg;
 
     brk_bt::OracleNodeClient on_sock;
     on_sock.connect(on_ip, on_port);

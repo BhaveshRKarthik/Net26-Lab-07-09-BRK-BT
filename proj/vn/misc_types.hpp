@@ -44,7 +44,7 @@ namespace brk_bt {
             int m_old_uncaught_exceptions;
         };
 
-    } // namespace detail::defer
+    } // namespace detail::defer_
 
 #define BRK_BT_GLUE(x, y) x##y
 #define BRK_BT_UNIQ_NAME(x, y) BRK_BT_GLUE(x, y)

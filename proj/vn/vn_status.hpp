@@ -5,6 +5,7 @@
 #include <map>
 #include <netinet/in.h>
 #include <span>
+#include <vector>
 
 namespace brk_bt {
 
@@ -16,9 +17,13 @@ namespace brk_bt {
 
     struct vn_status {
         char alpha;
+        uint16_t udp_port;
+        in_addr ip;
+        uint32_t seq_no;
         std::map<char, link_state_tup> neighbours;
 
         static vn_status from_binary(std::span<std::byte> bytes);
+        std::vector<std::byte> to_binary();
     };
 
 } // namespace brk_bt

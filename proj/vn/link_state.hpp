@@ -16,6 +16,6 @@ namespace brk_bt {
 
         std::vector<std::byte> to_binary() const;
 
-        void from_binary(std::span<std::byte> raw);
+        bool from_binary(std::span<std::byte> raw);
     };
 } // namespace brk_bt

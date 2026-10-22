@@ -15,5 +15,5 @@ namespace brk_bt {
     std::optional<config> parse_argv(int argc, char* argv[]);
 
     void help_options();
-    
-}
+
+} // namespace brk_bt

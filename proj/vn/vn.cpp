@@ -32,8 +32,9 @@ int main(int argc, char* argv[]) {
 
     uint8_t counter = 0;
     while (true) {
-        auto ev = ep.wait(625);
+        auto ev = ep.wait(500);
         if (!ev) {
+            lsp.decr_counters();
             if (!(counter++ & 7)) lsp.dump();
             continue;
         }

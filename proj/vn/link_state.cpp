@@ -21,6 +21,7 @@ namespace brk_bt {
         uint32_t new_seq_no = read_u32(bytes);
         if (new_seq_no <= seq_no) return false;
 
+        timeout = initial_timeout;
         src_alpha = static_cast<char>(bytes[0]);
         seq_no = new_seq_no;
         neighbours.clear();

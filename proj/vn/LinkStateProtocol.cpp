@@ -19,8 +19,8 @@ namespace brk_bt {
         if (m_status.alpha && recvd.alpha != m_status.alpha) throw exception_with_location("LINK-STATE has unexpected 0-cost alpha");
         if (recvd.ip != m_status.ip) throw exception_with_location("LINK-STATE has unexpected 0-cost ip");
         if (recvd.udp_port != m_status.udp_port) throw exception_with_location("LINK-STATE has unexpected 0-cost udp port");
-        
-        m_status.alpha = recvd.alpha;
+
+        m_status.alpha      = recvd.alpha;
         m_status.neighbours = std::move(recvd.neighbours);
 
         auto to_send_dgram = m_status.to_binary();
@@ -61,17 +61,34 @@ namespace brk_bt {
         test_fail(ret, "Failed to send UDP packet");
     }
 
-    void LinkStateProtocol::dump() const {
+    void LinkStateProtocol::dump() {
+        auto to_send_dgram = m_status.to_binary();
+
+        for (auto [alpha, state] : m_status.neighbours) {
+            sendto(to_send_dgram, state.ip, state.udp_port);
+        }
+
         std::println("-- No messages in past 5 seconds --");
 
-        for (auto [alpha, ls]: m_graph) {
-        bool first = true;
-        for (auto [alpha, cost] : ls.neighbours) {
-            if (!first) std::print(", ");
-            std::print("{} = {}", alpha, cost);
-            first = false;
+        for (auto [alpha, ls] : m_graph) {
+            std::print("State of {}: timeout = {:2}", alpha, ls.timeout);
+            for (auto [alpha, cost] : ls.neighbours) {
+                std::print(", {} = {}", alpha, cost);
+            }
+            std::println();
         }
-        std::println();
+    }
+
+    void LinkStateProtocol::decr_counters() {
+        std::vector<char> to_remove;
+        for (auto& [alpha, ls] : m_graph) {
+            if (alpha != m_status.alpha && !--ls.timeout) {
+                to_remove.push_back(alpha);
+                std::println("Data from node {} has gone stale", alpha);
+            }
+        }
+        for (char rm : to_remove) {
+            m_graph.erase(rm);
         }
     }
 

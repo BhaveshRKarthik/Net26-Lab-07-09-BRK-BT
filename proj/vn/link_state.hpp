@@ -10,7 +10,10 @@
 
 namespace brk_bt {
     struct link_state {
+        constexpr static uint8_t initial_timeout = 12;
+
         char src_alpha;
+        uint8_t timeout = initial_timeout;
         std::uint32_t seq_no;
         std::map<char, uint32_t> neighbours;
 

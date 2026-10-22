@@ -22,7 +22,8 @@ namespace brk_bt {
 
         int fd() const { return m_sock; }
 
-        void dump() const;
+        void dump();
+        void decr_counters();
 
     private:
         LinkStateProtocol(int sock, uint32_t ip, uint16_t udp_port)

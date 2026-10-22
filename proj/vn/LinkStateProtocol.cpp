@@ -1,5 +1,6 @@
 #include "LinkStateProtocol.hpp"
 #include <fcntl.h>
+#include <print>
 #include <sys/socket.h>
 
 namespace brk_bt {
@@ -58,6 +59,20 @@ namespace brk_bt {
         };
         auto ret = ::sendto(m_sock, bytes.data(), bytes.size(), MSG_NOSIGNAL, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
         test_fail(ret, "Failed to send UDP packet");
+    }
+
+    void LinkStateProtocol::dump() const {
+        std::println("-- No messages in past 5 seconds --");
+
+        for (auto [alpha, ls]: m_graph) {
+        bool first = true;
+        for (auto [alpha, cost] : ls.neighbours) {
+            if (!first) std::print(", ");
+            std::print("{} = {}", alpha, cost);
+            first = false;
+        }
+        std::println();
+        }
     }
 
 } // namespace brk_bt

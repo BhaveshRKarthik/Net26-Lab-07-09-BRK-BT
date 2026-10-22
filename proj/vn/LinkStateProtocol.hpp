@@ -22,6 +22,8 @@ namespace brk_bt {
 
         int fd() const { return m_sock; }
 
+        void dump() const;
+
     private:
         LinkStateProtocol(int sock, uint32_t ip, uint16_t udp_port)
             : m_sock(sock), m_status{ .alpha = '\0', .udp_port = udp_port, .ip = ip, .seq_no = 0, .neighbours = {} } {

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <print>
 
 #include "LinkStateProtocol.hpp"
 #include "OracleNodeClient.hpp"
@@ -6,6 +6,8 @@
 #include "connect_msg.hpp"
 #include "epoll.hpp"
 #include "misc_types.hpp"
+
+
 
 int main(int argc, char* argv[]) {
     auto cfg = brk_bt::parse_argv(argc, argv);
@@ -25,12 +27,16 @@ int main(int argc, char* argv[]) {
     brk_bt::Epoll ep({ { on.fd(), lsp.fd() } });
 
     on.send(con_msg.to_binary());
-    std::cout << "CONNECTED\n";
+    std::println("CONNECTED");
 
 
+    uint8_t counter = 0;
     while (true) {
-        auto ev = ep.wait(10000);
-        if (!ev) continue;
+        auto ev = ep.wait(625);
+        if (!ev) {
+            if (!(counter++ & 7)) lsp.dump();
+            continue;
+        }
 
         if (ev->data.fd == on.fd()) {
             if (auto status = on.recv()) lsp.update(std::move(*status));

@@ -6,8 +6,8 @@
 namespace brk_bt {
 
     struct config {
-        in_addr on_ip;
-        in_addr vn_ip;
+        uint32_t on_ip;
+        uint32_t vn_ip;
         uint16_t on_port;
         uint16_t vn_port;
     };

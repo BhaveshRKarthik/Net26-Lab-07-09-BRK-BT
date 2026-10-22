@@ -1,4 +1,5 @@
 #include "OracleNodeClient.hpp"
+#include <print>
 #include <vector>
 
 namespace brk_bt {
@@ -25,6 +26,16 @@ namespace brk_bt {
         }
         test_fail(recv_len, "Failed to recv");
         result = vn_status::from_binary(buf);
+
+        std::print("Received LINK-STATE: ");
+        bool first = true;
+        for (auto [alpha, tup] : result->neighbours) {
+            if (!first) std::print(", ");
+            std::print("{} = {}", alpha, tup.cost);
+            first = false;
+        }
+        std::println();
+
         return result;
     }
 

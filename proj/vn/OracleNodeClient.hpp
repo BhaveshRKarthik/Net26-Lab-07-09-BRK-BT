@@ -18,8 +18,8 @@ namespace brk_bt {
         ~OracleNodeClient() { close(m_sock); }
 
     public:
-        void connect(in_addr ip, std::uint16_t port) {
-            sockaddr_in addr{ .sin_family = AF_INET, .sin_port = htons(port), .sin_addr = ip, .sin_zero = { 0 } };
+        void connect(uint32_t ip, std::uint16_t port) {
+            sockaddr_in addr{ .sin_family = AF_INET, .sin_port = htons(port), .sin_addr = htonl(ip), .sin_zero = { 0 } };
             test_fail(::connect(m_sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)), "Failed to connect");
         }
 

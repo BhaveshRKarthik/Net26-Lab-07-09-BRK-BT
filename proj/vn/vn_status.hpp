@@ -10,7 +10,7 @@
 namespace brk_bt {
 
     struct link_state_tup {
-        in_addr ip;
+        uint32_t ip;
         uint16_t udp_port;
         uint32_t cost;
     };
@@ -18,7 +18,7 @@ namespace brk_bt {
     struct vn_status {
         char alpha;
         uint16_t udp_port;
-        in_addr ip;
+        uint32_t ip;
         uint32_t seq_no;
         std::map<char, link_state_tup> neighbours;
 

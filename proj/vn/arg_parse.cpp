@@ -5,6 +5,7 @@
 #include <ifaddrs.h>
 #include <iostream>
 #include <string_view>
+#include <format>
 
 namespace brk_bt {
 
@@ -12,13 +13,12 @@ namespace brk_bt {
         std::cout << "./vn [OPTIONS]\n"
                      "\t--on-ip\n"
                      "\t--on-port\n"
-                     "\t--my-ip\n"
-                     "\t--my-port\n"
+                     "\t--vn-ip\n"
+                     "\t--vn-port\n"
                      "\t--help\n";
     }
 
-    // Returns IPv4 address in network byte order, or 0 on failure.
-    in_addr get_interface_ip(std::string_view ifname) {
+    uint32_t get_interface_ip(std::string_view ifname) {
         ifaddrs* list = nullptr;
         test_fail(getifaddrs(&list), "getifaddrs failed");
         defer {
@@ -30,16 +30,21 @@ namespace brk_bt {
             if (ifa->ifa_name != ifname) continue;
 
             auto* sin = reinterpret_cast<sockaddr_in*>(ifa->ifa_addr);
-            return sin->sin_addr;
+            return ntohl(sin->sin_addr.s_addr);
         }
 
         throw exception_with_location("Unknown Interface");
     }
 
     std::optional<config> parse_argv(int argc, char* argv[]) {
+        using namespace std::string_view_literals;
+
         std::optional<config> cfg = std::nullopt;
 
         if (argc == 1) {
+            return cfg;
+        }
+        if (argc == 2 && argv[1] == "--help"sv) {
             return cfg;
         }
 
@@ -54,17 +59,18 @@ namespace brk_bt {
 
         for (int i = 1; i < argc; ++i) {
             auto& arg = argv[i];
-            using namespace std::string_view_literals;
 
             if (arg == "--on-ip"sv) {
                 if (++i == argc) throw exception_with_location("Expected: ON IP");
                 if (found_mask & 0b0001) throw exception_with_location("Repeated: ON IP");
-                inet_pton(AF_INET, argv[i], &cfg->on_ip);
+                test_fail(inet_pton(AF_INET, argv[i], &cfg->on_ip)-1, "Invalid IP");
+                cfg->on_ip = ntohl(cfg->on_ip);
                 found_mask |= 0b0001;
             } else if (arg == "--vn-ip"sv) {
                 if (++i == argc) throw exception_with_location("Expected: VN IP");
                 if (found_mask & 0b0010) throw exception_with_location("Repeated: VN IP");
-                inet_pton(AF_INET, argv[i], &cfg->vn_ip);
+                test_fail(inet_pton(AF_INET, argv[i], &cfg->vn_ip)-1, "Invalid IP");
+                cfg->vn_ip = ntohl(cfg->vn_ip);
                 found_mask |= 0b0010;
             } else if (arg == "--on-port"sv) {
                 if (++i == argc) throw exception_with_location("Expected: ON TCP port");

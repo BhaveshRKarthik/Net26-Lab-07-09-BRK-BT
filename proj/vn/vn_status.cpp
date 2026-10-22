@@ -2,14 +2,18 @@
 #include "arg_parse.hpp"
 
 namespace brk_bt {
+    static uint32_t read_u32(std::span<std::byte> bytes) {
+        return static_cast<uint32_t>(bytes[1]) << 24 | static_cast<uint32_t>(bytes[2]) << 16 | static_cast<uint32_t>(bytes[3]) << 8 | static_cast<uint32_t>(bytes[4]);
+    }
+
     vn_status vn_status::from_binary(std::span<std::byte> bytes) {
-        vn_status result{ .alpha = '\0', .neighbours = {} };
+        vn_status result{ .alpha = '\0', .udp_port = 0, .ip = { 0 }, .seq_no = 0, .neighbours = {} };
         while (!bytes.empty()) {
             char alpha       = static_cast<char>(bytes[0]);
             link_state_tup x = {
-                .ip       = static_cast<uint32_t>(bytes[1] << 24 | bytes[2] << 16 | bytes[3] << 8 | bytes[4]),
-                .udp_port = static_cast<uint16_t>(bytes[5] << 8 | bytes[6]),
-                .cost     = static_cast<uint32_t>(bytes[7] << 24 | bytes[8] << 16 | bytes[9] << 8 | bytes[10]),
+                .ip       = read_u32(bytes),
+                .udp_port = static_cast<uint16_t>(static_cast<uint16_t>(bytes[5]) << 8 | static_cast<uint16_t>(bytes[6])),
+                .cost     = read_u32(bytes.subspan(6)),
             };
 
             if (x.cost == 0) {
@@ -28,7 +32,8 @@ namespace brk_bt {
     }
 
     std::vector<std::byte> vn_status::to_binary() {
-        std::vector<std::byte> result{ std::byte(alpha), std::byte(seq_no << 24), std::byte(seq_no << 16), std::byte(seq_no << 8), std::byte(seq_no) };
+        ++seq_no;
+        std::vector<std::byte> result{ std::byte(alpha), std::byte(seq_no >> 24), std::byte(seq_no >> 16), std::byte(seq_no >> 8), std::byte(seq_no) };
         result.reserve(5 + neighbours.size() * 5);
         for (auto [alpha, tup] : neighbours) {
             result.insert(result.end(),

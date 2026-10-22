@@ -1,7 +1,10 @@
 #include <iostream>
 
+#include "LinkStateProtocol.hpp"
 #include "OracleNodeClient.hpp"
 #include "arg_parse.hpp"
+#include "connect_msg.hpp"
+#include "epoll.hpp"
 #include "misc_types.hpp"
 
 int main(int argc, char* argv[]) {
@@ -13,12 +16,29 @@ int main(int argc, char* argv[]) {
 
     auto [on_ip, vn_ip, on_port, vn_port] = *cfg;
 
-    brk_bt::OracleNodeClient on_sock;
-    on_sock.connect(on_ip, on_port);
+    brk_bt::LinkStateProtocol lsp(vn_ip, vn_port);
+
+    brk_bt::OracleNodeClient on;
+    on.connect(on_ip, on_port);
+
+    brk_bt::connect_msg con_msg{ .ip = vn_ip, .port = vn_port };
+    brk_bt::Epoll ep({ { on.fd(), lsp.fd() } });
+
+    on.send(con_msg.to_binary());
     std::cout << "CONNECTED\n";
 
-    // brk_bt::connect_tuple con_msg{ .ip = self_ip, .udp_port = self_udp_port };
-    // on_sock.send(con_msg.to_binary());
+
+    while (true) {
+        auto ev = ep.wait(10000);
+        if (!ev) continue;
+
+        if (ev->data.fd == on.fd()) {
+            if (auto status = on.recv()) lsp.update(std::move(*status));
+        } else if (ev->data.fd == lsp.fd()) {
+            lsp.update();
+        }
+    }
+
 
     // brk_bt::IPv4UDPPeer my_sock{ self_udp_port };
     // while (true) {

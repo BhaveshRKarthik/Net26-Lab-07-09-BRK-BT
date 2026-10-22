@@ -110,5 +110,5 @@ class OracleServer:
                 if self.config[i][j] != -1:
                     msg += peer.letter + peer.connect + struct.pack("!I", self.config[i][j])
             me.sock.sendall(bytes([len(msg)//11]) + msg)
-            print(f"{BLUE}  -> Sent Message to {me.letter.decode()}{RESET}")
+            print(f"{BLUE}  -> Sent LINK-STATE to {me.letter.decode()}{RESET}")
  

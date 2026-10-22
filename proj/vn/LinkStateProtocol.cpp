@@ -1,6 +1,7 @@
 #include "LinkStateProtocol.hpp"
 #include <fcntl.h>
-#include <print>
+#include <iostream>
+#include <format>
 #include <sys/socket.h>
 
 namespace brk_bt {
@@ -68,14 +69,14 @@ namespace brk_bt {
             sendto(to_send_dgram, state.ip, state.udp_port);
         }
 
-        std::println("-- No messages in past 5 seconds --");
+        std::cout << std::format("-- No messages in past 5 seconds --\n");
 
         for (auto [alpha, ls] : m_graph) {
-            std::print("State of {}: timeout = {:2}", alpha, ls.timeout);
+            std::cout << std::format("State of {}: timeout = {:2}", alpha, ls.timeout);
             for (auto [alpha, cost] : ls.neighbours) {
-                std::print(", {} = {}", alpha, cost);
+                std::cout << std::format(", {} = {}", alpha, cost);
             }
-            std::println();
+            std::cout << std::endl;
         }
     }
 
@@ -84,7 +85,7 @@ namespace brk_bt {
         for (auto& [alpha, ls] : m_graph) {
             if (alpha != m_status.alpha && !--ls.timeout) {
                 to_remove.push_back(alpha);
-                std::println("Data from node {} has gone stale", alpha);
+                std::cout << std::format("Data from node {} has gone stale\n", alpha);
             }
         }
         for (char rm : to_remove) {

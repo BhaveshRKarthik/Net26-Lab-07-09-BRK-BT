@@ -3,7 +3,7 @@ LD = g++
 -include */*.d
 .PRECIOUS: */*.o
 
-CXXFLAGS = -g -Ivn -MD -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wold-style-cast -Wnrvo
+CXXFLAGS = -g -Ivn -MD -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wold-style-cast
 LDFLAGS = -g
 
 VNOBJS = $(addsuffix .o, $(basename $(wildcard vn/*.cpp)))

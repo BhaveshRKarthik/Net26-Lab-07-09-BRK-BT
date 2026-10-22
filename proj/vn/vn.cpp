@@ -1,4 +1,5 @@
-#include <print>
+#include <iostream>
+#include <format>
 
 #include "LinkStateProtocol.hpp"
 #include "OracleNodeClient.hpp"
@@ -27,7 +28,7 @@ int main(int argc, char* argv[]) {
     brk_bt::Epoll ep({ { on.fd(), lsp.fd() } });
 
     on.send(con_msg.to_binary());
-    std::println("CONNECTED");
+    std::cout << std::format("CONNECTED\n");
 
 
     uint8_t counter = 0;

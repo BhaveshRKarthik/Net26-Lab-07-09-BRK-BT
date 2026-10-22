@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <sys/types.h>
 #include <utility>
 
 namespace brk_bt {
@@ -27,7 +26,7 @@ namespace brk_bt {
 
     void test_fail(ssize_t test, std::string_view error_msg, const std::source_location& loc = std::source_location::current());
 
-    namespace detail::defer {
+    namespace detail::defer_ {
         template<typename Func>
         class defer_impl : immovable {
         public:
@@ -49,6 +48,6 @@ namespace brk_bt {
 
 #define BRK_BT_GLUE(x, y) x##y
 #define BRK_BT_UNIQ_NAME(x, y) BRK_BT_GLUE(x, y)
-#define defer const ::brk_bt::detail::defer::defer_impl BRK_BT_UNIQ_NAME(defer_guard_, __COUNTER__) = [&]()
+#define defer const ::brk_bt::detail::defer_::defer_impl BRK_BT_UNIQ_NAME(defer_guard_, __COUNTER__) = [&]()
 
 } // namespace brk_bt

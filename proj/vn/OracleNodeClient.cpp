@@ -1,12 +1,15 @@
 #include "OracleNodeClient.hpp"
+#include <vector>
 
 namespace brk_bt {
-    std::optional<link_state> OracleNodeClient::recv() {
+    std::optional<vn_status> OracleNodeClient::recv() {
+        std::optional<vn_status> result = std::nullopt;
+
         ssize_t recv_len = 0;
 
         uint8_t size;
         recv_len = ::recv(m_sock, &size, 1, MSG_DONTWAIT);
-        if (recv_len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) return std::nullopt;
+        if (recv_len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) return result;
         test_fail(recv_len, "Failed to recv size byte");
         if (recv_len == 0) throw exception_with_location("TCP Connection with ON closed by ON.");
 
@@ -18,17 +21,18 @@ namespace brk_bt {
             recv_len = ::recv(m_sock, buf.data() + total_read, buf_size - total_read, 0);
             test_fail(recv_len, "Failed to recv data");
             if (recv_len == 0) throw exception_with_location("TCP Connection with ON closed by ON.");
-            total_read += recv_len;
+            total_read += static_cast<size_t>(recv_len);
         }
         test_fail(recv_len, "Failed to recv");
-        return link_state::from_binary(buf);
+        result = vn_status::from_binary(buf);
+        return result;
     }
 
     void OracleNodeClient::send(std::span<const std::byte> data) {
         while (!data.empty()) {
             ssize_t curr = ::send(m_sock, data.data(), data.size(), MSG_NOSIGNAL);
             test_fail(curr, "Failed to send");
-            data = data.subspan(curr);
+            data = data.subspan(static_cast<size_t>(curr));
         }
     }
 

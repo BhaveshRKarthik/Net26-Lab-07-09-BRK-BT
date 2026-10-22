@@ -18,7 +18,7 @@ class VirtualNode:
  
 class OracleServer:
     def __init__(self, host_ip: str, port: int, config_path: pathlib.Path):
-        self.path = config_path.resolve()
+        self.path = config_path
         self.config = read_config(self.path, None)
         self.n = len(self.config)
  
@@ -105,9 +105,10 @@ class OracleServer:
  
     def broadcast(self):
         for i, me in enumerate(self.nodes):
-            msg = bytes([self.n])
+            msg = bytes()
             for j, peer in enumerate(self.nodes):
-                msg += peer.letter + peer.connect + struct.pack("!I", self.config[i][j])
-            me.sock.sendall(msg)
+                if self.config[i][j] != -1:
+                    msg += peer.letter + peer.connect + struct.pack("!I", self.config[i][j])
+            me.sock.sendall(bytes([len(msg)//11]) + msg)
             print(f"{BLUE}  -> Sent Message to {me.letter.decode()}{RESET}")
  

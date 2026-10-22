@@ -12,12 +12,13 @@ namespace brk_bt {
     std::optional<Datagram> IPv4UDPPeer::recv(int flags) const {
         Datagram result;
         socklen_t addrlen = sizeof(result.from);
-        char buf[2048];
+        char buf[65536];
         ssize_t recv_len = ::recvfrom(m_sock.get(), buf, sizeof(buf), flags, reinterpret_cast<sockaddr*>(&result.from), &addrlen);
-        if (recv_len < 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) return std::nullopt;
-            test_fail(-1, "Failed to recv");
+        if ((recv_len < 0) && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+            return std::nullopt;
         }
+
+        test_fail(recv_len, "Failed to recv");
 
         result.data.assign(buf, static_cast<size_t>(recv_len));
         return result;

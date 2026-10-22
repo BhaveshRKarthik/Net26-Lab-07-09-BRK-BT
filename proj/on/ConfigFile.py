@@ -26,6 +26,6 @@ def read_config(config_file: pathlib.Path, old_len: int | None):
 
     for i in range(N):
         for j in range(N-i):
-            config[i][i+j+1] = config[i+j+1][i] = config_raw[i][j] & 0xFFFFFFFF
+            config[i][i+j+1] = config[i+j+1][i] = config_raw[i][j]
 
     return config

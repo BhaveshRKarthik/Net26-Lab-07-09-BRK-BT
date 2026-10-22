@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 #include "misc_types.hpp"
-#include "msg.hpp"
+#include "vn_status.hpp"
 
 namespace brk_bt {
     class OracleNodeClient : immovable {
@@ -19,13 +19,15 @@ namespace brk_bt {
 
     public:
         void connect(in_addr ip, std::uint16_t port) {
-            sockaddr_in addr{ .sin_family = AF_INET, .sin_port = htons(port), .sin_addr = ip };
+            sockaddr_in addr{ .sin_family = AF_INET, .sin_port = htons(port), .sin_addr = ip, .sin_zero = { 0 } };
             test_fail(::connect(m_sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)), "Failed to connect");
         }
 
-        std::optional<link_state> recv();
+        std::optional<vn_status> recv();
 
         void send(std::span<const std::byte> data);
+
+        int fd() { return m_sock; }
 
     private:
         OracleNodeClient(int sock) : m_sock(sock) { test_fail(sock, "Invalid Socket"); }

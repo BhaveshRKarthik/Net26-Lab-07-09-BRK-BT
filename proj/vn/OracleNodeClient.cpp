@@ -28,12 +28,9 @@ namespace brk_bt {
         test_fail(recv_len, "Failed to recv");
         result = vn_status::from_binary(buf);
 
-        std::cout << std::format("Received LINK-STATE: ");
-        bool first = true;
+        std::cout << std::format("Received LINK-STATE: {} = 0", result->alpha);
         for (auto [alpha, tup] : result->neighbours) {
-            if (!first) std::cout << std::format(", ");
-            std::cout << std::format("{} = {}", alpha, tup.cost);
-            first = false;
+            std::cout << std::format(", {} = {}", alpha, tup.cost);
         }
         std::cout << std::endl;
         return result;

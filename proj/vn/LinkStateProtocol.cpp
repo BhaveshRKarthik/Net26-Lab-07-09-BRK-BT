@@ -69,7 +69,7 @@ namespace brk_bt {
             sendto(to_send_dgram, state.ip, state.udp_port);
         }
 
-        std::cout << std::format("-- No messages in past 5 seconds --\n");
+        std::cout << "-- No messages in past 4 seconds --\n";
 
         for (auto [alpha, ls] : m_graph) {
             std::cout << std::format("State of {}: timeout = {:2}", alpha, ls.timeout);
